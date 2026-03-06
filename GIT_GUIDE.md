@@ -7,9 +7,11 @@ A comprehensive guide to the git commands used in this project. This covers what
 ## Table of Contents
 
 1. [Initial Setup](#initial-setup)
-2. [Core Commands](#core-commands)
-3. [Common Workflows](#common-workflows)
-4. [Pull Request Workflow](#pull-request-workflow)
+2. [Initializing a New Repository](#initializing-a-new-repository)
+3. [Core Commands](#core-commands)
+4. [Common Workflows](#common-workflows)
+5. [Pull Request Workflow](#pull-request-workflow)
+6. [Branch Protection and Repository Access](#branch-protection-and-repository-access)
 
 ---
 
@@ -45,6 +47,85 @@ core.editor=vim
 
 ---
 
+## Initializing a New Repository
+
+If you have an existing project on your computer that isn't tracked by Git yet and you want to push it to GitHub, here's how to set it up from scratch.
+
+### Step 1: Initialize Git
+
+Navigate to your project folder and initialize an empty Git repository:
+
+```bash
+cd your-project-folder
+git init
+```
+
+This creates a hidden `.git` directory that Git uses to track changes. Your files are not tracked yet — you still need to add and commit them.
+
+### Step 2: Stage and Commit Your Files
+
+Add the files you want to track and make your first commit:
+
+```bash
+# Stage all files in the project
+git add .
+
+# Or stage specific files
+git add index.html style.css
+
+# Create the initial commit
+git commit -m "Initial commit"
+```
+
+### Step 3: Create a Repository on GitHub
+
+1. Go to [github.com](https://github.com) and click **"New repository"**
+2. Give it a name (e.g., `my-project`)
+3. **Do not** check "Add a README" or "Add .gitignore" — your project already has files, and initializing with these will cause conflicts when you push
+4. Click **"Create repository"**
+
+GitHub will show you a set of commands. You'll use the ones for pushing an existing repository.
+
+### Step 4: Connect Your Local Repo to GitHub
+
+Link your local repository to the remote on GitHub:
+
+```bash
+git remote add origin https://github.com/your-username/my-project.git
+```
+
+This tells Git where to push your code. `origin` is the conventional name for your primary remote.
+
+You can verify the remote was added:
+
+```bash
+git remote -v
+```
+
+### Step 5: Rename the Default Branch to `main`
+
+Older versions of Git create a default branch called `master`. Most projects now use `main` as the default. Rename it to stay consistent:
+
+```bash
+git branch -M main
+```
+
+The `-M` flag forces the rename even if a `main` branch already exists.
+
+### Step 6: Push to GitHub
+
+Push your code to the remote and set `origin main` as the default upstream branch:
+
+```bash
+git push -u origin main
+```
+
+The `-u` flag sets up tracking so that future `git push` and `git pull` commands will default to `origin main` without you having to specify it each time.
+
+After this, your code is live on GitHub. Refresh the repository page to see your files.
+
+---
+
 ## Core Commands
 
 ### `git status`
@@ -58,14 +139,14 @@ git status
 Example output:
 
 ```
-On branch dominic-barker
+On branch feature-login
 Changes not staged for commit:
   (use "git add <file>..." to update what will be committed)
-        modified:   Main.java
+        modified:   app.js
 
 Untracked files:
   (use "git add <file>..." to include in what will be committed)
-        GIT_GUIDE.md
+        README.md
 ```
 
 **When to use:** Run this frequently to understand what state your working directory is in before staging, committing, or switching branches.
@@ -112,10 +193,10 @@ Stages files for the next commit. Staging is the step between modifying a file a
 
 ```bash
 # Stage a specific file
-git add Main.java
+git add app.js
 
 # Stage multiple specific files
-git add Main.java GIT_GUIDE.md
+git add app.js README.md
 
 # Stage all changed and new files in the current directory
 git add .
@@ -134,12 +215,12 @@ Unstages files or discards uncommitted changes. This command has both safe and d
 
 **Safe — Unstage a file (keeps your changes, just removes it from staging):**
 ```bash
-git restore --staged Main.java
+git restore --staged app.js
 ```
 
 **DESTRUCTIVE — Discard local changes to a file:**
 ```bash
-git restore Main.java
+git restore app.js
 ```
 > **DANGER: This permanently deletes your uncommitted changes to that file. There is no undo. If you haven't committed or stashed your work, it is gone forever.**
 
@@ -157,18 +238,18 @@ Removes a file from git tracking. The removal will be recorded in the next commi
 
 **Safe — Stop tracking a file but keep it on disk:**
 ```bash
-git rm --cached oldfile.java
+git rm --cached config.bak
 ```
 
 **DESTRUCTIVE — Remove a file from the repo AND delete it from disk:**
 ```bash
-git rm oldfile.java
+git rm config.bak
 ```
 > **DANGER: This deletes the file from your computer. If the file has uncommitted changes, they will be lost.**
 
 **DESTRUCTIVE — Remove an entire directory from the repo AND delete it from disk:**
 ```bash
-git rm -r old-directory/
+git rm -r legacy-folder/
 ```
 > **DANGER: This recursively deletes the directory and all its contents from your computer. Double-check the path before running this.**
 
@@ -182,13 +263,13 @@ Records the staged changes as a new commit in the repository history. Every comm
 
 ```bash
 # Commit with an inline message
-git commit -m "Add rock-paper-scissors game logic"
+git commit -m "Add user authentication endpoint"
 
 # Commit with a multi-line message (opens your editor)
 git commit
 
 # Stage all tracked modified files and commit in one step
-git commit -am "Fix scoring bug in Main.java"
+git commit -am "Fix validation bug in login form"
 ```
 
 **Commit message best practices:**
@@ -207,10 +288,10 @@ Uploads your local commits to the remote repository so others can see your work.
 git push
 
 # Push a specific branch
-git push origin dominic-barker
+git push origin feature-login
 
 # Push and set the upstream tracking branch (first push of a new branch)
-git push -u origin your-branch-name
+git push -u origin feature-login
 ```
 
 **Key point:** You must commit your changes locally before you can push them. `git push` sends commits, not individual file changes.
@@ -233,9 +314,9 @@ git checkout -b new-feature-branch
 
 **DESTRUCTIVE — Restore a specific file to its last committed state:**
 ```bash
-git checkout -- Main.java
+git checkout -- app.js
 ```
-> **DANGER: This permanently deletes your uncommitted changes to that file — identical to `git restore Main.java`. There is no undo. Make sure your work is committed or stashed first.**
+> **DANGER: This permanently deletes your uncommitted changes to that file — identical to `git restore app.js`. There is no undo. Make sure your work is committed or stashed first.**
 
 **When to use:**
 - Switching to `main` before pulling the latest changes
@@ -361,40 +442,30 @@ git reset --hard <commit-hash>
 
 ---
 
-## Project Structure
-
-In this project, every team member has been assigned **their own branch named after them** (e.g., `dominic-barker`, `jane-smith`). You will do all of your work on your personal branch. **Do not create new branches** — just use the one assigned to you.
-
-Tasks are assigned through **GitHub Issues**. When you are assigned an issue, you will make commits on your branch to address it. Once your fix is complete, you will open a **Pull Request to `main`**. The project maintainer will then review your PR and either merge it or request changes.
-
----
-
 ## Common Workflows
 
-### Switching to Your Branch
+### Switching Branches
 
-If you are not already on your branch, switch to it:
+Switch to an existing branch before starting work:
 
 ```bash
-# Switch to your personal branch
-git checkout your-name
-# Example:
-git checkout dominic-barker
+# Switch to a feature branch
+git checkout feature-login
 ```
 
-### Updating Your Local Repository
+### Updating Your Local Branch
 
-Before starting work on an issue, make sure your branch has the latest changes from `main`:
+Before starting work, make sure your branch has the latest changes from `main`:
 
 ```bash
 # 1. Switch to your branch (if not already on it)
-git checkout your-name
+git checkout feature-login
 
 # 2. Pull the latest changes from main into your branch
 git pull origin main
 ```
 
-This ensures you are working with the most up-to-date version of the project.
+This ensures you are working with the most up-to-date version of the codebase.
 
 ### Staging and Committing Changes
 
@@ -408,37 +479,35 @@ git status
 git log --oneline
 
 # 3. Stage the files you want to commit
-git add Main.java
+git add app.js
 
 # OR stage all changed files at once
 git add .
 ```
 
-**Note on `git add .`:** This stages every changed and new file in the current directory. You might worry about accidentally staging files that shouldn't be committed (like compiled `.class` files or IDE configuration folders). This is where the `.gitignore` file comes in — any files or directories listed in `.gitignore` are automatically excluded from staging. The `.gitignore` for this project is already set up to filter out build artifacts and IDE files, so `git add .` will only stage the correct project files.
+**Note on `git add .`:** This stages every changed and new file in the current directory. You might worry about accidentally staging files that shouldn't be committed (like compiled binaries or IDE configuration folders). This is where the `.gitignore` file comes in — any files or directories listed in `.gitignore` are automatically excluded from staging. As long as your `.gitignore` is set up correctly, `git add .` will only stage the files you actually want.
 
 ```bash
 # 4. Verify what is staged
 git status
 
 # 5. Commit with a descriptive message referencing the issue
-git commit -m "Add user input handling for rock-paper-scissors (#5)"
+git commit -m "Add input validation for login form (#5)"
 ```
 
 ### Pushing Your Work
 
-After committing locally, push to your branch on the remote:
+After committing locally, push your branch to the remote:
 
 ```bash
-git push origin your-name
-# Example:
-git push origin dominic-barker
+git push origin feature-login
 ```
 
 ### Undoing Mistakes
 
 **Safe — Unstage a file you accidentally staged (keeps your changes):**
 ```bash
-git restore --staged Main.java
+git restore --staged app.js
 ```
 
 **Safe — See what you're about to commit:**
@@ -448,20 +517,20 @@ git status
 
 **DESTRUCTIVE — Discard local changes to a file:**
 ```bash
-git restore Main.java
+git restore app.js
 ```
 > **DANGER: This permanently deletes your uncommitted changes to that file. There is no undo.**
 
 **DESTRUCTIVE — Discard ALL local changes and match the remote branch exactly:**
 ```bash
 git fetch origin
-git reset --hard origin/your-name
+git reset --hard origin/feature-login
 ```
 > **DANGER: This is the most destructive command in this guide. It permanently deletes ALL uncommitted and staged changes across every file and resets your branch to exactly match the remote. There is no undo. Only use this as an absolute last resort when you want to completely start over from the remote state.**
 
 **DESTRUCTIVE — Undo a pull/merge and revert your branch to a previous state:**
 
-If you accidentally pulled the wrong branch into yours (e.g., `git pull origin someone-elses-branch`), you can use `git reflog` and `git reset --hard` to go back to where you were before the pull.
+If you accidentally pulled the wrong branch or merged something unintended, you can use `git reflog` and `git reset --hard` to go back to where you were before.
 
 ```bash
 # 1. View recent history of where HEAD has been
@@ -487,30 +556,38 @@ git reset --hard b6fd99f
 
 ## Pull Request Workflow
 
-This is the expected process for addressing an assigned issue and getting your changes merged into `main`.
+This is the typical process for working on a feature or bug fix and getting your changes merged into `main`.
 
-### Step 1: Update Your Branch
+### Step 1: Create and Update Your Branch
 
-Make sure your branch has the latest code from `main`:
+Create a feature branch from the latest `main`:
 
 ```bash
-git checkout your-name
+git checkout main
+git pull origin main
+git checkout -b feature-login
+```
+
+Or if your branch already exists, update it:
+
+```bash
+git checkout feature-login
 git pull origin main
 ```
 
-### Step 2: Work on the Issue
+### Step 2: Make Your Changes
 
-Read the assigned GitHub Issue carefully. Make the necessary code changes on your branch, then stage and commit:
+Make the necessary code changes on your branch, then stage and commit:
 
 ```bash
 # Check your changes
 git status
 
 # Stage your changes
-git add Main.java
+git add app.js
 
 # Commit with a message referencing the issue number
-git commit -m "Fix scoring bug (closes #12)"
+git commit -m "Add login validation (closes #12)"
 ```
 
 You can make multiple commits as you work. Each commit should represent a logical unit of change.
@@ -518,35 +595,132 @@ You can make multiple commits as you work. Each commit should represent a logica
 ### Step 3: Push Your Branch
 
 ```bash
-git push origin your-name
+git push origin feature-login
 ```
 
 ### Step 4: Create the Pull Request on GitHub
 
 1. Go to the repository on GitHub
 2. Click **"Compare & pull request"** (or go to the Pull Requests tab and click **"New pull request"**)
-3. Set the **base** branch to `main` and the **compare** branch to **your branch** (e.g., `dominic-barker`)
+3. Set the **base** branch to `main` and the **compare** branch to your feature branch (e.g., `feature-login`)
 4. Fill in the PR details:
-   - **Title:** A clear summary of what the PR does (e.g., "Fix scoring bug")
+   - **Title:** A clear summary of what the PR does (e.g., "Add login validation")
    - **Description:** Explain what you changed, why, and reference the issue using `Closes #12` so it automatically closes when merged
 5. Click **"Create pull request"**
 
 ### Step 5: Wait for Review
 
-The project maintainer will review your PR. There are two possible outcomes:
+A reviewer will look over your PR. There are two possible outcomes:
 
 - **Approved and merged** — your changes are now in `main`. Pull the latest to stay in sync:
   ```bash
+  git checkout main
   git pull origin main
   ```
-- **Changes requested** — the maintainer will leave comments explaining what needs to be fixed (e.g., code doesn't compile, logic error, etc.). Make the fixes on your branch, commit, and push again:
+- **Changes requested** — the reviewer will leave comments explaining what needs to be fixed. Make the fixes on your branch, commit, and push again:
   ```bash
   # Fix the issues locally, then:
-  git add Main.java
-  git commit -m "Address review feedback: fix compilation error"
-  git push origin your-name
+  git add app.js
+  git commit -m "Address review feedback: fix validation edge case"
+  git push origin feature-login
   ```
   The PR updates automatically with your new commits. No need to create a new PR.
+
+---
+
+## Branch Protection and Repository Access
+
+Git commands control what happens locally, but GitHub adds layers of access control and branch protection on top. Understanding these layers is important for keeping your `main` branch safe — especially when working with collaborators.
+
+### The Three Layers of Access Control
+
+Access on GitHub is controlled in three layers, each building on the last:
+
+| Layer | What It Controls |
+|-------|-----------------|
+| **Visibility** (public/private) | Who can **see** the repo |
+| **Collaborators** (permissions) | Who can **write** to the repo |
+| **Branch protection** | What **rules** writers must follow |
+
+### Repository Visibility
+
+- **Public repo** — anyone can see the code, clone the repo, and open pull requests. Only collaborators can push directly.
+- **Private repo** — no one can see or access the repo unless you explicitly add them as a collaborator.
+
+### Collaborator Roles
+
+On personal GitHub repos, there are only two roles:
+
+| Role | What They Can Do |
+|------|-----------------|
+| **Owner** (you) | Everything — push, merge, delete branches, change settings, manage collaborators |
+| **Collaborator** | Push to branches, merge PRs, create/delete branches — but **cannot** change repo settings or manage collaborators |
+
+There is no "read-only collaborator" on personal repos. If you add someone, they get write access.
+
+**Who can do what by default:**
+
+| Who | Public Repo | Private Repo |
+|-----|------------|-------------|
+| **You** (owner) | Full control | Full control |
+| **Collaborators** | Read + Write | Read + Write |
+| **Everyone else** | Read only (can fork + open PRs) | No access at all |
+
+**Adding a collaborator:** Go to your repo's **Settings > Collaborators > Add people** and search by their GitHub username.
+
+> **Note:** Organization repos (e.g., for a company or class) have more granular roles: **Read**, **Triage**, **Write**, **Maintain**, and **Admin**. This is how an organization owner can give members write access to their own branches while controlling who can merge to `main`. For personal repos, the simple model above is all you need.
+
+### Why Branch Protection Matters
+
+Without branch protection, any collaborator can:
+- Push directly to `main`
+- Merge their own PRs without anyone reviewing them
+- Force-push and rewrite commit history
+
+Even on a solo project, having no protection means **you** can accidentally push broken code directly to `main`, force-push and destroy history, or accidentally delete branches.
+
+Branch protection fills that gap by enforcing rules that **all** writers must follow:
+
+| Risk | Branch Protection Rule |
+|------|----------------------|
+| Collaborator pushes directly to `main` | **Require a pull request before merging** |
+| Collaborator merges their own PR | **Require approvals** (they can't approve their own) |
+| Collaborator force-pushes | **Do not allow force pushes** |
+
+### Recommended Branch Protection Settings
+
+To set up branch protection, go to your repo's **Settings > Branches > Add branch protection rule** and set the branch name pattern to `main`.
+
+**For a solo or small public repo:**
+
+| Setting | Enable? | Why |
+|---------|---------|-----|
+| **Do not allow force pushes** | Yes | Protects your commit history from accidental overwrites |
+| **Do not allow deletions** | Yes | Prevents accidentally deleting `main` |
+| **Require a pull request before merging** | Optional | Turn it on if you want the discipline of always working on branches. Skip it if it feels like overhead for a solo project. |
+| **Require approvals** | No | There's no one else to approve — this would block you |
+
+**For a collaborative repo (multiple contributors):**
+
+| Setting | Enable? | Why |
+|---------|---------|-----|
+| **Do not allow force pushes** | Yes | Prevents anyone from rewriting shared history |
+| **Do not allow deletions** | Yes | Prevents accidental deletion of `main` |
+| **Require a pull request before merging** | Yes | Forces all changes to go through code review |
+| **Require approvals** | Yes | Ensures at least one other person reviews before merging |
+
+### The Typical Protected Repo Workflow
+
+Once branch protection is enabled on `main`, the workflow looks like this:
+
+1. Create a feature branch from `main`
+2. Push your changes to that branch
+3. Open a PR from your feature branch to `main`
+4. Get a notification, review the changes, and either approve or request changes
+5. Merge it (squash or merge commit)
+6. Delete the feature branch (optional cleanup)
+
+No one — including you — can push directly to `main` or merge without meeting the protection rules. This keeps the `main` branch stable and forces all changes through a reviewable process.
 
 ---
 
